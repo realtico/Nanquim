@@ -1,0 +1,18 @@
+# Compilation Artifacts
+build/
+bin/
+lib/
+*.o
+*.so
+*.a
+
+# Editor/IDE Files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Logs and Temp
+*.log
+tmp/
