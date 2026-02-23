@@ -46,6 +46,7 @@ static NQ_Context* create_context_struct(int id) {
         
         ctx->pen_color = (SDL_Color){255, 255, 255, 255};
         ctx->bg_color = (SDL_Color){0, 0, 0, 255};
+        ctx->line_width = 1.0f;
         
         ctx->wheel_delta = 0;
         ctx->font_size = 12; // Base size for text

@@ -140,6 +140,14 @@ void nq_pset(float x, float y) {
     if (SDL_MUSTLOCK(surf)) SDL_UnlockSurface(surf);
 }
 
+void nq_line_weight(float w) {
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
+    if (ctx) {
+        ctx->line_width = w;
+    }
+}
+
 void nq_line(float x1, float y1, float x2, float y2) {
     if (!g_active_ctx) return;
     NQ_Context* ctx = g_active_ctx;
@@ -152,9 +160,16 @@ void nq_line(float x1, float y1, float x2, float y2) {
 
     // Usando Software Renderer para desenhar na Surface com SDL2_gfx ou Renderer padrão
     // Usaremos lineRGBA para consistência com o pedido de usar SDL2_gfx
-    lineRGBA(ctx->current_target->soft_renderer, 
+    if (ctx->line_width > 1.0f) {
+        thickLineRGBA(ctx->current_target->soft_renderer, 
+             px1, py1, px2, py2, 
+             (Uint8)ctx->line_width,
+             ctx->pen_color.r, ctx->pen_color.g, ctx->pen_color.b, ctx->pen_color.a);
+    } else {
+        lineRGBA(ctx->current_target->soft_renderer, 
              px1, py1, px2, py2, 
              ctx->pen_color.r, ctx->pen_color.g, ctx->pen_color.b, ctx->pen_color.a);
+    }
 }
 
 void nq_box(float x1, float y1, float x2, float y2, bool filled) {
@@ -190,6 +205,10 @@ void nq_circle(float x, float y, float r, bool filled) {
     int py = map_y(ctx, y);
     int pr = map_scalar(ctx, r);
 
+    // SDL2_gfx circle doesn't support thickness easily.
+    // If we wanted thick circle outline, we would need to draw multiple circles or use arc approximation.
+    // Following instructions strictly for nq_line priority.
+
     if (filled) {
         filledCircleRGBA(ctx->current_target->soft_renderer,
                          px, py, pr,
@@ -199,6 +218,77 @@ void nq_circle(float x, float y, float r, bool filled) {
                    px, py, pr,
                    ctx->pen_color.r, ctx->pen_color.g, ctx->pen_color.b, ctx->pen_color.a);
     }
+}
+
+void nq_arc(float x, float y, float radius, float start_angle, float end_angle, bool filled) {
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
+    if (!ctx || !ctx->current_target || !ctx->current_target->soft_renderer) return;
+
+    int px = map_x(ctx, x);
+    int py = map_y(ctx, y);
+    int pr = map_scalar(ctx, radius);
+    
+    // SDL2_gfx angles are in degrees.
+    if (filled) {
+        filledPieRGBA(ctx->current_target->soft_renderer,
+                      px, py, pr,
+                      (Sint16)start_angle, (Sint16)end_angle,
+                      ctx->pen_color.r, ctx->pen_color.g, ctx->pen_color.b, ctx->pen_color.a);
+    } else {
+        arcRGBA(ctx->current_target->soft_renderer,
+                px, py, pr,
+                (Sint16)start_angle, (Sint16)end_angle,
+                ctx->pen_color.r, ctx->pen_color.g, ctx->pen_color.b, ctx->pen_color.a);
+    }
+}
+
+void nq_polygon(float *vx, float *vy, int n, bool filled) {
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
+    if (!ctx || !ctx->current_target || !ctx->current_target->soft_renderer) return;
+    
+    if (n < 3) return;
+
+    // Allocate temp arrays for Screen Space coordinates
+    Sint16* sx = (Sint16*)malloc(n * sizeof(Sint16));
+    Sint16* sy = (Sint16*)malloc(n * sizeof(Sint16));
+    
+    if (!sx || !sy) {
+        if(sx) free(sx);
+        if(sy) free(sy);
+        return;
+    }
+
+    // Map all vertices
+    for(int i=0; i<n; i++) {
+        sx[i] = (Sint16)map_x(ctx, vx[i]);
+        sy[i] = (Sint16)map_y(ctx, vy[i]);
+    }
+
+    if (filled) {
+        filledPolygonRGBA(ctx->current_target->soft_renderer,
+                          sx, sy, n,
+                          ctx->pen_color.r, ctx->pen_color.g, ctx->pen_color.b, ctx->pen_color.a);
+    } else {
+        if (ctx->line_width > 1.0f) {
+             // Decompose into thick lines for thickness support
+             for(int i=0; i<n; i++) {
+                 int next = (i+1)%n;
+                 thickLineRGBA(ctx->current_target->soft_renderer,
+                     sx[i], sy[i], sx[next], sy[next],
+                     (Uint8)ctx->line_width,
+                     ctx->pen_color.r, ctx->pen_color.g, ctx->pen_color.b, ctx->pen_color.a);
+             }
+        } else {
+            polygonRGBA(ctx->current_target->soft_renderer,
+                        sx, sy, n,
+                        ctx->pen_color.r, ctx->pen_color.g, ctx->pen_color.b, ctx->pen_color.a);
+        }
+    }
+    
+    free(sx);
+    free(sy);
 }
 
 /* --- API ASSETS & BUFFERS --- */

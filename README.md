@@ -12,11 +12,14 @@ It wraps SDL2 to provide a high-level "Simulation Engine" API, focusing on proce
 - **Text Support:** Simple overlay text rendering for scientific annotations.
 - **Software Rendering Core:** Pixel-perfect manipulation in RAM buffers, blitted to GPU for display.
 - **Multi-Window Support:** Manage multiple simulation figures simultaneously.
+- **Unified Geometry:** Flexible `nq_polygon` and `nq_arc` primitives with filled/outline support.
+- **Line Thickness:** Configurable line weight for robust diagrams.
 - **Shared Library:** Can be compiled as a `.so` for dynamic linking.
 
 ## Examples Included
 
 - **`test_pattern`**: Basic shape and color test.
+- **`geometry_test`**: Demonstration of polygons, arcs, and line thickness.
 - **`static_test`**: Mathematical function plotting (Sinc function).
 - **`diffraction_sim`**: Fraunhofer Diffraction physics simulation (Single/Double Slit).
 - **`input_demo`**: Interactive demonstration of mouse, keyboard, and coordinate feedback.

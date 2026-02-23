@@ -25,8 +25,9 @@ TEST_PATTERN = $(BIN_DIR)/test_pattern
 STATIC_TEST = $(BIN_DIR)/static_test
 DIFFRACTION_SIM = $(BIN_DIR)/diffraction_sim
 INPUT_DEMO = $(BIN_DIR)/input_demo
+GEOMETRY_TEST = $(BIN_DIR)/geometry_test
 
-ALL_EXAMPLES = $(TEST_PATTERN) $(STATIC_TEST) $(DIFFRACTION_SIM) $(INPUT_DEMO)
+ALL_EXAMPLES = $(TEST_PATTERN) $(STATIC_TEST) $(DIFFRACTION_SIM) $(INPUT_DEMO) $(GEOMETRY_TEST)
 
 
 .PHONY: all clean directories
@@ -54,6 +55,9 @@ $(DIFFRACTION_SIM): examples/diffraction_sim.c $(LIB_TARGET)
 	$(CC) $(CFLAGS) $< -o $@ -L$(LIB_DIR) -lnanquim $(LDFLAGS) -Wl,-rpath,$(PWD)/$(LIB_DIR)
 
 $(INPUT_DEMO): examples/input_demo.c $(LIB_TARGET)
+	$(CC) $(CFLAGS) $< -o $@ -L$(LIB_DIR) -lnanquim $(LDFLAGS) -Wl,-rpath,$(PWD)/$(LIB_DIR)
+
+$(GEOMETRY_TEST): examples/geometry_test.c $(LIB_TARGET)
 	$(CC) $(CFLAGS) $< -o $@ -L$(LIB_DIR) -lnanquim $(LDFLAGS) -Wl,-rpath,$(PWD)/$(LIB_DIR)
 
 directories:

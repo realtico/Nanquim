@@ -79,6 +79,7 @@ typedef struct {
     // Estado Gráfico
     SDL_Color pen_color;
     SDL_Color bg_color;
+    float line_width;
     
     // Configurações de Input
     int wheel_delta;
@@ -184,6 +185,21 @@ void nq_box(float x1, float y1, float x2, float y2, bool filled);
  * @param r Raio (nas unidades do eixo X se NQ_WORLD).
  */
 void nq_circle(float x, float y, float r, bool filled);
+
+/**
+ * @brief Desenha um arco de circunferência ou setor preenchido.
+ */
+void nq_arc(float x, float y, float radius, float start_angle, float end_angle, bool filled);
+
+/**
+ * @brief Desenha um polígono.
+ */
+void nq_polygon(float *vx, float *vy, int n, bool filled);
+
+/**
+ * @brief Define a espessura da linha.
+ */
+void nq_line_weight(float w);
 
 /* --- INPUT & INTERACTION --- */
 

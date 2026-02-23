@@ -58,6 +58,21 @@ Desenha um retângulo definido por dois cantos opostos.
 #### `void nq_circle(float x, float y, float r, bool filled)`
 Desenha um círculo. O raio `r` é interpretado na escala do eixo X (se em modo WORLD).
 
+#### `void nq_arc(float x, float y, float r, float start, float end, bool filled)`
+Desenha um arco (se `filled=false`) ou uma fatia de pizza (se `filled=true`).
+- **start/end:** Ângulos em graus.
+- **Nota:** O contorno (`filled=false`) é atualmente fixo em 1px.
+
+#### `void nq_polygon(float *vx, float *vy, int n, bool filled)`
+Desenha um polígono arbitrário definido por `n` vértices.
+- **vx, vy:** Arrays de coordenadas lógicas.
+- Se `filled=false`, desenha o contorno respeitando a espessura de linha atual.
+
+#### `void nq_line_weight(float w)`
+Define a espessura da linha para chamadas subsequentes. Default: 1.0f.
+- Afeta: `nq_line`, `nq_polygon` (modo contorno).
+- **Não** afeta: `nq_circle`, `nq_arc`, `nq_box` (estes permanecem com 1px devido a limitações da backend de software). *Dica: Para caixas grossas, desenhe um polígono de 4 vértices.*
+
 #### `void nq_color(Uint8 r, Uint8 g, Uint8 b)`
 Define a cor atual do "pincel" (linhas, pontos, contornos).
 
