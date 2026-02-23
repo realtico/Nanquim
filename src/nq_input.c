@@ -4,6 +4,7 @@
 #include <math.h>
 
 // Extern: definido no nq_core.c
+extern NQ_Context* g_active_ctx;
 extern NQ_Context* nq_get_active_context(void);
 
 // ==========================================
@@ -32,7 +33,8 @@ bool nq_mouse_button(NQ_MouseButton btn) {
 }
 
 int nq_mouse_scroll(void) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return 0;
+    NQ_Context* ctx = g_active_ctx;
     if (ctx) {
         int d = ctx->wheel_delta;
         ctx->wheel_delta = 0; // Consumir o delta
@@ -45,12 +47,12 @@ void nq_mouse_pos(float *x, float *y) {
     int mx, my;
     SDL_GetMouseState(&mx, &my);
     
-    NQ_Context* ctx = nq_get_active_context();
-    if (!ctx) {
+    if (!g_active_ctx) {
         *x = (float)mx;
         *y = (float)my;
         return;
     }
+    NQ_Context* ctx = g_active_ctx;
 
     // Inverse Mapping: Pixel -> World
     // x_world = x_min + (pixel / w) * (x_max - x_min)
@@ -77,7 +79,8 @@ void nq_mouse_pos(float *x, float *y) {
 // ==========================================
 
 void nq_set_font_size(int size) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (ctx) {
         ctx->font_size = size;
     }
@@ -109,7 +112,8 @@ static int _internal_map_y(NQ_Context* ctx, float y_world) {
 }
 
 void nq_put_text(float x, float y, const char* text) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (!ctx || !ctx->current_target || !ctx->current_target->soft_renderer) return;
 
     int px = _internal_map_x(ctx, x);

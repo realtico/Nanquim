@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 // Acesso externo ao contexto ativo (definido em nq_core.c)
+extern NQ_Context* g_active_ctx;
 extern NQ_Context* nq_get_active_context(void);
 
 // ==========================================
@@ -84,7 +85,8 @@ static void put_pixel_surface(SDL_Surface *surface, int x, int y, Uint32 pixel) 
 // ==========================================
 
 void nq_setup_coords(float x_min, float x_max, float y_min, float y_max) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (ctx) {
         ctx->coord_mode = NQ_WORLD;
         ctx->x_min = x_min;
@@ -95,7 +97,8 @@ void nq_setup_coords(float x_min, float x_max, float y_min, float y_max) {
 }
 
 void nq_color(Uint8 r, Uint8 g, Uint8 b) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (ctx) {
         ctx->pen_color = (SDL_Color){r, g, b, 255};
         
@@ -107,7 +110,8 @@ void nq_color(Uint8 r, Uint8 g, Uint8 b) {
 }
 
 void nq_background(Uint8 r, Uint8 g, Uint8 b) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (ctx) {
         ctx->bg_color = (SDL_Color){r, g, b, 255};
         
@@ -120,7 +124,8 @@ void nq_background(Uint8 r, Uint8 g, Uint8 b) {
 }
 
 void nq_pset(float x, float y) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (!ctx || !ctx->current_target) return;
 
     int px = map_x(ctx, x);
@@ -136,7 +141,8 @@ void nq_pset(float x, float y) {
 }
 
 void nq_line(float x1, float y1, float x2, float y2) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (!ctx || !ctx->current_target || !ctx->current_target->soft_renderer) return;
 
     int px1 = map_x(ctx, x1);
@@ -152,7 +158,8 @@ void nq_line(float x1, float y1, float x2, float y2) {
 }
 
 void nq_box(float x1, float y1, float x2, float y2, bool filled) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (!ctx || !ctx->current_target || !ctx->current_target->soft_renderer) return;
 
     int px1 = map_x(ctx, x1);
@@ -175,7 +182,8 @@ void nq_box(float x1, float y1, float x2, float y2, bool filled) {
 }
 
 void nq_circle(float x, float y, float r, bool filled) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (!ctx || !ctx->current_target || !ctx->current_target->soft_renderer) return;
 
     int px = map_x(ctx, x);
@@ -195,6 +203,8 @@ void nq_circle(float x, float y, float r, bool filled) {
 
 /* --- API ASSETS & BUFFERS --- */
 
+extern void nq_register_surface(NQ_Surface* surf);
+
 NQ_Surface* nq_create_surface(int w, int h) {
     NQ_Surface* surf = (NQ_Surface*)malloc(sizeof(NQ_Surface));
     surf->sdl_surf = SDL_CreateRGBSurface(0, w, h, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
@@ -209,6 +219,8 @@ NQ_Surface* nq_create_surface(int w, int h) {
     surf->h = h;
     surf->has_colorkey = false;
     surf->alpha = 255;
+    
+    nq_register_surface(surf);
     return surf;
 }
 
@@ -229,6 +241,7 @@ NQ_Surface* nq_load_sprite(const char* path) {
         surf->h = surf->sdl_surf->h;
         surf->has_colorkey = false;
         surf->alpha = 255;
+        nq_register_surface(surf);
         return surf;
     } else {
         free(surf);
@@ -237,21 +250,24 @@ NQ_Surface* nq_load_sprite(const char* path) {
 }
 
 void nq_set_target(NQ_Surface* target) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (ctx && target) {
         ctx->current_target = target;
     }
 }
 
 void nq_reset_target() {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (ctx && ctx->canvas) {
         ctx->current_target = ctx->canvas;
     }
 }
 
 void nq_blit(NQ_Surface* src, float x, float y, NQ_Anchor anchor) {
-    NQ_Context* ctx = nq_get_active_context();
+    if (!g_active_ctx) return;
+    NQ_Context* ctx = g_active_ctx;
     if (!ctx || !ctx->current_target || !src || !src->sdl_surf) return;
     
     int px = map_x(ctx, x);

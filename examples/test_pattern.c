@@ -5,16 +5,7 @@ int main(void) {
     // 1. Cria Janela 800x600
     nq_screen(800, 600, "Nanquim Test: Coordinates & Primitives", NQ_SCALE_FIXED);
     
-    // 2. Define Coordenadas Cartesianas (-10 a 10 em ambos eixos)
-    // Note: Y min é -10 (baixo) e Y max é 10 (topo), padrão matemático
-    nq_setup_coords(-10.0f, 10.0f, 10.0f, -10.0f); // Invertendo Y min/max se SDL usa Y down?
-    // Correção: SDL Y é 0 no topo.
-    // Se queremos matemático (Y sobe), y_min deve mapear para bottom (height) e y_max para top (0).
-    // map_y do Nanquim faz: (y - min)/(max-min).
-    // Se passarmos -10, 10, -10, 10... vamos testar o comportamento.
-    // Vamos usar o padrão "Tela": 0,0 no topo.
-    // nq_setup_coords(-10, 10, -10, 10) -> -10=top, 10=bottom?
-    
+    // 2. Define Coordenadas Cartesianas
     // Vamos explicitamente definir um sistema onde (0,0) é centro
     // X: -400 a 400
     // Y: -300 a 300

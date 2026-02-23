@@ -10,8 +10,19 @@
 static NQ_Context* g_contexts[MAX_CONTEXTS];
 static int g_context_count = 0;
 // O ponteiro global crucial
-static NQ_Context* g_active_ctx = NULL;
+NQ_Context* g_active_ctx = NULL;
 static bool g_is_running = true;
+
+// Rastreamento de superfícies para evitar memory leaks
+#define MAX_SURFACES 100
+static NQ_Surface* g_surfaces[MAX_SURFACES];
+static int g_surface_count = 0;
+
+void nq_register_surface(NQ_Surface* surf) {
+    if (g_surface_count < MAX_SURFACES) {
+        g_surfaces[g_surface_count++] = surf;
+    }
+}
 
 // ==========================================
 // Funções Auxiliares Internas
@@ -192,6 +203,18 @@ void nq_sync_all() {
 }
 
 void nq_close() {
+    // Limpar superfícies criadas pelo usuário
+    for (int i = 0; i < g_surface_count; i++) {
+        NQ_Surface* surf = g_surfaces[i];
+        if (surf) {
+            if (surf->soft_renderer) SDL_DestroyRenderer(surf->soft_renderer);
+            if (surf->sdl_surf) SDL_FreeSurface(surf->sdl_surf);
+            free(surf);
+            g_surfaces[i] = NULL;
+        }
+    }
+    g_surface_count = 0;
+
     for (int i = 0; i < g_context_count; i++) {
         NQ_Context* ctx = g_contexts[i];
         if (ctx) {
@@ -210,6 +233,7 @@ void nq_close() {
         }
     }
     g_context_count = 0;
+    g_active_ctx = NULL;
     SDL_Quit();
 }
 
