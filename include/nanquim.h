@@ -49,6 +49,16 @@ typedef enum {
 /* --- ESTRUTURAS --- */
 
 /**
+ * @brief Retângulo (x, y, w, h) para definição de regiões.
+ * Substitui o uso de SDL_Rect na API pública.
+ */
+typedef struct {
+    int x, y;
+    int w, h;
+} NQ_Rect;
+
+
+/**
  * @brief Wrapper para superfícies de imagem (Buffer em RAM).
  */
 typedef struct {
@@ -79,6 +89,8 @@ typedef struct {
     // Estado Gráfico
     SDL_Color pen_color;
     SDL_Color bg_color;
+    SDL_Color axis_color; // Color for major axes (x=0, y=0)
+    SDL_Color grid_color; // Color for grid lines
     float line_width;
     
     // Configurações de Input
@@ -91,8 +103,20 @@ typedef struct {
     NQ_CoordMode coord_mode;
     float x_min, x_max;
     float y_min, y_max;
+    float inv_range_x, inv_range_y; // Precomputed 1.0 / (max - min)
+    float base_ppu_x, base_ppu_y; // Base pixels per unit (at zoom 1.0)
+    
+    // Câmera Global
+    float camera_x, camera_y;
+    float camera_zoom;
+    float camera_angle; // Radianos
     
     NQ_ScaleMode scale_mode;
+    
+    // Configuração de Visualização (Aspect Ratio)
+    float window_scale;
+    int offset_x, offset_y;
+    
     bool running;
 } NQ_Context;
 
@@ -138,6 +162,12 @@ void nq_close();
  * @return true se a aplicação deve continuar, false se o usuário pediu para sair.
  */
 bool nq_running();
+
+/**
+ * @brief Retorna o tempo passado (em segundos) desde a última chamada.
+ * Útil para simulações independentes de frame rate.
+ */
+float nq_delta_time();
 
 /* --- API DRAW --- */
 
@@ -248,12 +278,44 @@ void nq_set_font_size(int size);
  * @brief Cria uma nova superfície (imagem/buffer) em memória.
  */
 NQ_Surface* nq_create_surface(int w, int h);
+void nq_free_surface(NQ_Surface* surf);
 
 /**
  * @brief Carrega uma imagem de arquivo.
- * Suporta BMP nativamente. Outros formatos requerem SDL_Image (não incluído no core).
+ * Suporta BMP nativamente. Outros formatos requerem SDL_Image.
  */
 NQ_Surface* nq_load_sprite(const char* path);
+
+/**
+ * @brief Define a cor de transparência (Color Key).
+ * Pixels com esta cor serão ignorados no blit.
+ */
+void nq_set_colorkey(NQ_Surface* surf, Uint8 r, Uint8 g, Uint8 b);
+
+/**
+ * @brief Desenha apenas uma região específica da superfície fonte (Atlas).
+ * @param atlas Superfície contendo múltiplos frames (source).
+ * @param region Retângulo definindo a região a ser copiada do atlas.
+ * @param x Posição X no mundo.
+ * @param y Posição Y no mundo.
+ * @param w Largura no mundo de destino.
+ * @param h Altura no mundo de destino.
+ * @param angle Ângulo de rotação.
+ * @param flip_h Se verdadeiro, espelha horizontalmente.
+ */
+void nq_draw_region(NQ_Surface* atlas, NQ_Rect region, float x, float y, float w, float h, float angle, bool flip_h);
+
+/**
+ * @brief Copia (brita) uma superfície para o alvo atual com transformações.
+ * @param src Superfície a ser desenhada.
+ * @param x Posição X no mundo.
+ * @param y Posição Y no mundo.
+ * @param w Largura no mundo (escala horizontal).
+ * @param h Altura no mundo (escala vertical).
+ * @param angle Ângulo em graus (horário).
+ * @param anchor Ponto de ancoragem (NQ_TOP_LEFT ou NQ_CENTERED).
+ */
+void nq_blit_ex(NQ_Surface* src, float x, float y, float w, float h, float angle, NQ_Anchor anchor);
 
 /**
  * @brief Define uma superfície específica como alvo de desenho.
@@ -270,5 +332,48 @@ void nq_reset_target();
  * @brief Copia (brita) uma superfície para o alvo atual.
  */
 void nq_blit(NQ_Surface* src, float x, float y, NQ_Anchor anchor);
+
+/* --- GRID SYSTEM --- */
+void nq_axis_color(Uint8 r, Uint8 g, Uint8 b);
+void nq_grid_color(Uint8 r, Uint8 g, Uint8 b);
+void nq_draw_grid_rect(float step_x, float step_y, bool show_labels);
+void nq_draw_grid_polar(float step_r, float step_theta, bool show_labels);
+
+/* --- CAMERA API --- */
+
+/**
+ * @brief Move a câmera global para olhar para um ponto específico (Ponto central da tela).
+ */
+void nq_camera_look_at(float x, float y);
+
+/**
+ * @brief Define o zoom da câmera. 1.0 é o padrão.
+ */
+void nq_camera_zoom(float z);
+void nq_camera_zoom_rel(float factor);
+
+/**
+ * @brief Rotaciona a câmera.
+ * @param angle Ângulo em radianos.
+ */
+void nq_camera_rotate(float angle);
+void nq_camera_rotate_rel(float d_angle);
+
+/**
+ * @brief Move a câmera relativamente.
+ */
+void nq_camera_pan(float dx, float dy);
+
+// Getters
+float nq_camera_get_x(void);
+float nq_camera_get_y(void);
+float nq_camera_get_zoom(void);
+float nq_camera_get_angle(void);
+
+/**
+ * @brief Retorna os limites visíveis do mundo atual com base na câmera.
+ * Útil para otimizar desenho (culling) ou grades infinitas.
+ */
+void nq_get_camera_bounds(float* min_x, float* max_x, float* min_y, float* max_y);
 
 #endif // NANQUIM_H

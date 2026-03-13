@@ -15,6 +15,8 @@ It wraps SDL2 to provide a high-level "Simulation Engine" API, focusing on proce
 - **Unified Geometry:** Flexible `nq_polygon` and `nq_arc` primitives with filled/outline support.
 - **Line Thickness:** Configurable line weight for robust diagrams.
 - **Shared Library:** Can be compiled as a `.so` for dynamic linking.
+- **Infinite Grids (New):** Dynamic, adaptive grid rendering that consistently covers the viewport regardless of zoom or pan.
+- **Adaptive Zoom (New):** Automatic adjustment of grid density to keep scientific plots readable at any scale.
 
 ## Examples Included
 
@@ -23,7 +25,9 @@ It wraps SDL2 to provide a high-level "Simulation Engine" API, focusing on proce
 - **`static_test`**: Mathematical function plotting (Sinc function).
 - **`diffraction_sim`**: Fraunhofer Diffraction physics simulation (Single/Double Slit).
 - **`input_demo`**: Interactive demonstration of mouse, keyboard, and coordinate feedback.
-
+- **`fourier_demo`**: Fourier Series visualization with infinite rectangular grid.
+- **`polar_demo`**: Polar Rose curves on an adaptive polar grid.
+- **`tracking_demo`**: Camera tracking and large world exploration.
 
 ## Dependencies
 

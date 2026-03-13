@@ -41,6 +41,9 @@ Deve ser chamada no loop principal para processar inputs e manter a janela respo
 #### `void nq_sync_all()`
 Atualiza todas as janelas. Transfere o buffer da RAM para a tela.
 
+#### `float nq_delta_time()`
+Retorna o tempo (em segundos) desde a última chamada desta função. Essencial para animações independentes de frame rate.
+
 ### Desenho (Drawing)
 
 #### `void nq_setup_coords(float x_min, float x_max, float y_min, float y_max)`
@@ -94,7 +97,30 @@ Redireciona todas as operações de desenho (pset, line, etc) para a Surface esp
 Volta o desenho para a tela principal (Canvas da janela).
 
 #### `void nq_blit(NQ_Surface* src, float x, float y, NQ_Anchor anchor)`
-Copia o conteúdo de `src` para o alvo atual na posição (x,y) do mundo.
+
+#### `void nq_blit_ex(NQ_Surface* src, float x, float y, float w, float h, float angle, NQ_Anchor anchor)`
+Versão extendida do blit com suporte a escala e rotação.
+- **angle:** Rotação em radianos. A rotação é aplicada em sentido horário visual (consistente com `nq_camera_rotate`).
+
+### Câmera e Grid (New in v0.2.1)
+
+#### `void nq_camera_set(float x, float y, float zoom)`
+Define a posição central do mundo e o nível de zoom.
+
+#### `void nq_camera_rotate(float angle)`
+Rotaciona a view da câmera em radianos. A grade e o conteúdo giram de forma sincronizada.
+
+#### `void nq_draw_grid_rect(float step_x, float step_y, bool labels)`
+Desenha uma grade Cartesiana infinita. O passo (`step`) é adaptativo: se o zoom for alterado drasticamente, a grade recálcula as divisões automaticamente para evitar poluição visual.
+
+#### `void nq_draw_grid_polar(float step_r, float step_theta, bool labels)`
+Desenha uma grade Polar dinâmica, ajustando os anéis concêntricos conforme a câmera se move ou aproxima. Ideal para plotar funções polares como rosas ou espirais.
+
+#### `void nq_grid_color(Uint8 r, Uint8 g, Uint8 b)`
+Define a cor das linhas da grade.
+
+#### `void nq_axis_color(Uint8 r, Uint8 g, Uint8 b)`
+Define a cor dos eixos principais e dos rótulos numéricos. Aumente o contraste dessas cores para melhor legibilidade em fundos escuros.
 
 ### Input e Interação (Atualizado v0.2)
 
