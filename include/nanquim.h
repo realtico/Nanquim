@@ -5,6 +5,21 @@
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include <stdbool.h>
 
+/* --- EXPORT/IMPORT MACROS --- */
+#if defined(_WIN32) || defined(_WIN64)
+  #ifdef NQ_BUILD_DLL
+    #define NQ_API __declspec(dllexport)
+  #elif defined(NQ_STATIC)
+    #define NQ_API
+  #else
+    #define NQ_API __declspec(dllimport)
+  #endif
+#elif defined(__GNUC__) || defined(__clang__)
+  #define NQ_API __attribute__((visibility("default")))
+#else
+  #define NQ_API
+#endif
+
 /**
  * @file nanquim.h
  * @brief Biblioteca gráfica minimalista baseada em SDL2, inspirada em BASIC e MATLAB.
@@ -132,42 +147,42 @@ typedef struct {
  * @param mode Modo de escala (NQ_SCALE_FIXED, etc).
  * @return ID da janela criada (0 a N). Retorna -1 em erro.
  */
-int  nq_screen(int w, int h, const char* title, NQ_ScaleMode mode);
+NQ_API int  nq_screen(int w, int h, const char* title, NQ_ScaleMode mode);
 
 /**
  * @brief Define qual janela (Figura) receberá os comandos de desenho subsequentes.
  * @param id ID da janela obtido via nq_screen().
  */
-void nq_figure(int id);
+NQ_API void nq_figure(int id);
 
 /**
  * @brief Processa a fila de eventos do sistema (mouse, teclado, janela).
  * Deve ser chamado em loop. Atualiza o contexto ativo baseado no foco.
  */
-void nq_poll_events();
+NQ_API void nq_poll_events();
 
 /**
  * @brief Atualiza a tela de todas as janelas ativas.
  * Faz o upload dos buffers (canvas) para a GPU e apresenta na tela.
  */
-void nq_sync_all();
+NQ_API void nq_sync_all();
 
 /**
  * @brief Fecha todas as janelas e encerra o Nanquim.
  */
-void nq_close();
+NQ_API void nq_close();
 
 /**
  * @brief Verifica se o sistema ainda deve continuar rodando.
  * @return true se a aplicação deve continuar, false se o usuário pediu para sair.
  */
-bool nq_running();
+NQ_API bool nq_running();
 
 /**
  * @brief Retorna o tempo passado (em segundos) desde a última chamada.
  * Útil para simulações independentes de frame rate.
  */
-float nq_delta_time();
+NQ_API float nq_delta_time();
 
 /* --- API DRAW --- */
 
@@ -180,56 +195,56 @@ float nq_delta_time();
  * @param y_min Valor lógico da borda inferior (ou superior).
  * @param y_max Valor lógico da borda superior (ou inferior).
  */
-void nq_setup_coords(float x_min, float x_max, float y_min, float y_max);
+NQ_API void nq_setup_coords(float x_min, float x_max, float y_min, float y_max);
 
 /**
  * @brief Define a cor atual do "pincel" (linhas, pontos, contornos).
  */
-void nq_color(Uint8 r, Uint8 g, Uint8 b);
+NQ_API void nq_color(Uint8 r, Uint8 g, Uint8 b);
 
 /**
  * @brief Define a cor de fundo e limpa a tela imediatamente com essa cor.
  */
-void nq_background(Uint8 r, Uint8 g, Uint8 b);
+NQ_API void nq_background(Uint8 r, Uint8 g, Uint8 b);
 
 /* Primitivas (Aceitam float para simulações precisas) */
 
 /**
  * @brief Desenha um ponto na coordenada especificada.
  */
-void nq_pset(float x, float y);
+NQ_API void nq_pset(float x, float y);
 
 /**
  * @brief Desenha uma linha entre dois pontos.
  */
-void nq_line(float x1, float y1, float x2, float y2);
+NQ_API void nq_line(float x1, float y1, float x2, float y2);
 
 /**
  * @brief Desenha um retângulo.
  * @param filled true para preenchido, false para apenas contorno.
  */
-void nq_box(float x1, float y1, float x2, float y2, bool filled);
+NQ_API void nq_box(float x1, float y1, float x2, float y2, bool filled);
 
 /**
  * @brief Desenha um círculo.
  * @param r Raio (nas unidades do eixo X se NQ_WORLD).
  */
-void nq_circle(float x, float y, float r, bool filled);
+NQ_API void nq_circle(float x, float y, float r, bool filled);
 
 /**
  * @brief Desenha um arco de circunferência ou setor preenchido.
  */
-void nq_arc(float x, float y, float radius, float start_angle, float end_angle, bool filled);
+NQ_API void nq_arc(float x, float y, float radius, float start_angle, float end_angle, bool filled);
 
 /**
  * @brief Desenha um polígono.
  */
-void nq_polygon(float *vx, float *vy, int n, bool filled);
+NQ_API void nq_polygon(float *vx, float *vy, int n, bool filled);
 
 /**
  * @brief Define a espessura da linha.
  */
-void nq_line_weight(float w);
+NQ_API void nq_line_weight(float w);
 
 /* --- INPUT & INTERACTION --- */
 
@@ -263,34 +278,34 @@ typedef enum {
     NQ_MOUSE_RIGHT = 3
 } NQ_MouseButton;
 
-bool nq_key_down(NQ_Key key);
-bool nq_mouse_button(NQ_MouseButton btn);
-void nq_mouse_pos(float *x, float *y);
-int nq_mouse_scroll(void);
+NQ_API bool nq_key_down(NQ_Key key);
+NQ_API bool nq_mouse_button(NQ_MouseButton btn);
+NQ_API void nq_mouse_pos(float *x, float *y);
+NQ_API int nq_mouse_scroll(void);
 
 /* --- TEXTO --- */
-void nq_put_text(float x, float y, const char* text);
-void nq_set_font_size(int size);
+NQ_API void nq_put_text(float x, float y, const char* text);
+NQ_API void nq_set_font_size(int size);
 
 /* --- API ASSETS & BUFFERS --- */
 
 /**
  * @brief Cria uma nova superfície (imagem/buffer) em memória.
  */
-NQ_Surface* nq_create_surface(int w, int h);
-void nq_free_surface(NQ_Surface* surf);
+NQ_API NQ_Surface* nq_create_surface(int w, int h);
+NQ_API void nq_free_surface(NQ_Surface* surf);
 
 /**
  * @brief Carrega uma imagem de arquivo.
  * Suporta BMP nativamente. Outros formatos requerem SDL_Image.
  */
-NQ_Surface* nq_load_sprite(const char* path);
+NQ_API NQ_Surface* nq_load_sprite(const char* path);
 
 /**
  * @brief Define a cor de transparência (Color Key).
  * Pixels com esta cor serão ignorados no blit.
  */
-void nq_set_colorkey(NQ_Surface* surf, Uint8 r, Uint8 g, Uint8 b);
+NQ_API void nq_set_colorkey(NQ_Surface* surf, Uint8 r, Uint8 g, Uint8 b);
 
 /**
  * @brief Desenha apenas uma região específica da superfície fonte (Atlas).
@@ -303,7 +318,7 @@ void nq_set_colorkey(NQ_Surface* surf, Uint8 r, Uint8 g, Uint8 b);
  * @param angle Ângulo de rotação.
  * @param flip_h Se verdadeiro, espelha horizontalmente.
  */
-void nq_draw_region(NQ_Surface* atlas, NQ_Rect region, float x, float y, float w, float h, float angle, bool flip_h);
+NQ_API void nq_draw_region(NQ_Surface* atlas, NQ_Rect region, float x, float y, float w, float h, float angle, bool flip_h);
 
 /**
  * @brief Copia (brita) uma superfície para o alvo atual com transformações.
@@ -315,65 +330,65 @@ void nq_draw_region(NQ_Surface* atlas, NQ_Rect region, float x, float y, float w
  * @param angle Ângulo em graus (horário).
  * @param anchor Ponto de ancoragem (NQ_TOP_LEFT ou NQ_CENTERED).
  */
-void nq_blit_ex(NQ_Surface* src, float x, float y, float w, float h, float angle, NQ_Anchor anchor);
+NQ_API void nq_blit_ex(NQ_Surface* src, float x, float y, float w, float h, float angle, NQ_Anchor anchor);
 
 /**
  * @brief Define uma superfície específica como alvo de desenho.
  * Os comandos nq_pset, nq_line, etc. desenharão nesta superfície.
  */
-void nq_set_target(NQ_Surface* target);
+NQ_API void nq_set_target(NQ_Surface* target);
 
 /**
  * @brief Restaura o alvo de desenho para a tela (canvas da janela ativa).
  */
-void nq_reset_target();
+NQ_API void nq_reset_target();
 
 /**
  * @brief Copia (brita) uma superfície para o alvo atual.
  */
-void nq_blit(NQ_Surface* src, float x, float y, NQ_Anchor anchor);
+NQ_API void nq_blit(NQ_Surface* src, float x, float y, NQ_Anchor anchor);
 
 /* --- GRID SYSTEM --- */
-void nq_axis_color(Uint8 r, Uint8 g, Uint8 b);
-void nq_grid_color(Uint8 r, Uint8 g, Uint8 b);
-void nq_draw_grid_rect(float step_x, float step_y, bool show_labels);
-void nq_draw_grid_polar(float step_r, float step_theta, bool show_labels);
+NQ_API void nq_axis_color(Uint8 r, Uint8 g, Uint8 b);
+NQ_API void nq_grid_color(Uint8 r, Uint8 g, Uint8 b);
+NQ_API void nq_draw_grid_rect(float step_x, float step_y, bool show_labels);
+NQ_API void nq_draw_grid_polar(float step_r, float step_theta, bool show_labels);
 
 /* --- CAMERA API --- */
 
 /**
  * @brief Move a câmera global para olhar para um ponto específico (Ponto central da tela).
  */
-void nq_camera_look_at(float x, float y);
+NQ_API void nq_camera_look_at(float x, float y);
 
 /**
  * @brief Define o zoom da câmera. 1.0 é o padrão.
  */
-void nq_camera_zoom(float z);
-void nq_camera_zoom_rel(float factor);
+NQ_API void nq_camera_zoom(float z);
+NQ_API void nq_camera_zoom_rel(float factor);
 
 /**
  * @brief Rotaciona a câmera.
  * @param angle Ângulo em radianos.
  */
-void nq_camera_rotate(float angle);
-void nq_camera_rotate_rel(float d_angle);
+NQ_API void nq_camera_rotate(float angle);
+NQ_API void nq_camera_rotate_rel(float d_angle);
 
 /**
  * @brief Move a câmera relativamente.
  */
-void nq_camera_pan(float dx, float dy);
+NQ_API void nq_camera_pan(float dx, float dy);
 
 // Getters
-float nq_camera_get_x(void);
-float nq_camera_get_y(void);
-float nq_camera_get_zoom(void);
-float nq_camera_get_angle(void);
+NQ_API float nq_camera_get_x(void);
+NQ_API float nq_camera_get_y(void);
+NQ_API float nq_camera_get_zoom(void);
+NQ_API float nq_camera_get_angle(void);
 
 /**
  * @brief Retorna os limites visíveis do mundo atual com base na câmera.
  * Útil para otimizar desenho (culling) ou grades infinitas.
  */
-void nq_get_camera_bounds(float* min_x, float* max_x, float* min_y, float* max_y);
+NQ_API void nq_get_camera_bounds(float* min_x, float* max_x, float* min_y, float* max_y);
 
 #endif // NANQUIM_H

@@ -1,10 +1,15 @@
 # Compilation Artifacts
 build/
+build_*/
 bin/
 lib/
 *.o
 *.so
 *.a
+*.dll
+*.dylib
+*.lib
+*.exp
 
 # Editor/IDE Files
 .vscode/

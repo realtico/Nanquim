@@ -32,12 +32,48 @@ It wraps SDL2 to provide a high-level "Simulation Engine" API, focusing on proce
 ## Dependencies
 
 - SDL2 (`libsdl2-dev`)
+- SDL2_image (`libsdl2-image-dev`)
 - SDL2_gfx (`libsdl2-gfx-dev`)
-- pkg-config
+- CMake 3.16+ (recommended) or pkg-config (Makefile fallback)
+
+### Linux (Debian/Ubuntu)
+
+```bash
+sudo apt install libsdl2-dev libsdl2-image-dev libsdl2-gfx-dev cmake
+```
+
+### macOS (Homebrew)
+
+```bash
+brew install sdl2 sdl2_image sdl2_gfx cmake
+```
+
+### Windows (vcpkg)
+
+```powershell
+vcpkg install sdl2 sdl2-image sdl2-gfx
+```
 
 ## Build
 
-To build the library and examples:
+### CMake (Linux, macOS, Windows)
+
+```bash
+cmake -B build
+cmake --build build
+```
+
+On Windows with Visual Studio:
+```powershell
+cmake -B build -G "Visual Studio 17 2022" -DCMAKE_TOOLCHAIN_FILE=<path-to-vcpkg>/scripts/buildsystems/vcpkg.cmake
+cmake --build build --config Release
+```
+
+Outputs:
+- `build/lib/` — Library (`libnanquim.so`, `nanquim.dll`, or `libnanquim.dylib`)
+- `build/bin/` — Example executables
+
+### Makefile (Linux only)
 
 ```bash
 make
