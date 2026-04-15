@@ -34,7 +34,8 @@ It wraps SDL2 to provide a high-level "Simulation Engine" API, focusing on proce
 - SDL2 (`libsdl2-dev`)
 - SDL2_image (`libsdl2-image-dev`)
 - SDL2_gfx (`libsdl2-gfx-dev`)
-- CMake 3.16+ (recommended) or pkg-config (Makefile fallback)
+- CMake 3.16+ (recommended)
+- pkg-config (required by the Makefile fallback and used by the SDL2_gfx CMake finder on Unix-like systems)
 
 ### Linux (Debian/Ubuntu)
 
@@ -45,7 +46,7 @@ sudo apt install libsdl2-dev libsdl2-image-dev libsdl2-gfx-dev cmake
 ### macOS (Homebrew)
 
 ```bash
-brew install sdl2 sdl2_image sdl2_gfx cmake
+brew install sdl2 sdl2_image sdl2_gfx cmake pkg-config
 ```
 
 ### Windows (vcpkg)

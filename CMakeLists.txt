@@ -17,6 +17,28 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_gfx REQUIRED)
 
+# Some SDL packages export include directories ending in /SDL2.
+# That works for headers included as <SDL.h>, but Nanquim uses <SDL2/SDL.h>.
+function(nq_collect_include_roots out_var)
+    set(result "")
+    foreach(dir IN LISTS ARGN)
+        if(NOT dir OR dir MATCHES "NOTFOUND")
+            continue()
+        endif()
+
+        list(APPEND result "${dir}")
+
+        get_filename_component(dir_name "${dir}" NAME)
+        if(dir_name STREQUAL "SDL2")
+            get_filename_component(parent_dir "${dir}" DIRECTORY)
+            list(APPEND result "${parent_dir}")
+        endif()
+    endforeach()
+
+    list(REMOVE_DUPLICATES result)
+    set(${out_var} "${result}" PARENT_SCOPE)
+endfunction()
+
 # ---- Normalize SDL2 targets ----
 # SDL2 target names vary across platforms and versions.
 # CMake config shipped with SDL2 >= 2.0.12 provides SDL2::SDL2.
@@ -38,6 +60,33 @@ if(NOT TARGET SDL2_image::SDL2_image)
     )
 endif()
 
+set(NQ_SDL2_INCLUDE_HINTS ${SDL2_INCLUDE_DIRS})
+if(TARGET SDL2::SDL2)
+    get_target_property(_nq_sdl2_target_includes SDL2::SDL2 INTERFACE_INCLUDE_DIRECTORIES)
+    if(_nq_sdl2_target_includes)
+        list(APPEND NQ_SDL2_INCLUDE_HINTS ${_nq_sdl2_target_includes})
+    endif()
+endif()
+nq_collect_include_roots(NQ_SDL2_INCLUDE_DIRS ${NQ_SDL2_INCLUDE_HINTS})
+
+set(NQ_SDL2_IMAGE_INCLUDE_HINTS ${SDL2_IMAGE_INCLUDE_DIRS})
+if(TARGET SDL2_image::SDL2_image)
+    get_target_property(_nq_sdl2_image_target_includes SDL2_image::SDL2_image INTERFACE_INCLUDE_DIRECTORIES)
+    if(_nq_sdl2_image_target_includes)
+        list(APPEND NQ_SDL2_IMAGE_INCLUDE_HINTS ${_nq_sdl2_image_target_includes})
+    endif()
+endif()
+nq_collect_include_roots(NQ_SDL2_IMAGE_INCLUDE_DIRS ${NQ_SDL2_IMAGE_INCLUDE_HINTS})
+
+set(NQ_SDL2_GFX_INCLUDE_HINTS ${SDL2_gfx_INCLUDE_DIRS})
+if(TARGET SDL2_gfx::SDL2_gfx)
+    get_target_property(_nq_sdl2_gfx_target_includes SDL2_gfx::SDL2_gfx INTERFACE_INCLUDE_DIRECTORIES)
+    if(_nq_sdl2_gfx_target_includes)
+        list(APPEND NQ_SDL2_GFX_INCLUDE_HINTS ${_nq_sdl2_gfx_target_includes})
+    endif()
+endif()
+nq_collect_include_roots(NQ_SDL2_GFX_INCLUDE_DIRS ${NQ_SDL2_GFX_INCLUDE_HINTS})
+
 # ---- Library Target ----
 add_library(nanquim
     src/nq_core.c
@@ -51,14 +100,19 @@ target_include_directories(nanquim
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
+    SYSTEM PUBLIC
+        ${NQ_SDL2_INCLUDE_DIRS}
+        ${NQ_SDL2_GFX_INCLUDE_DIRS}
+    SYSTEM PRIVATE
+        ${NQ_SDL2_IMAGE_INCLUDE_DIRS}
 )
 
 target_link_libraries(nanquim
     PUBLIC
         SDL2::SDL2
+        SDL2_gfx::SDL2_gfx
     PRIVATE
         SDL2_image::SDL2_image
-        SDL2_gfx::SDL2_gfx
 )
 
 # Math library (Unix needs -lm, MSVC links automatically)

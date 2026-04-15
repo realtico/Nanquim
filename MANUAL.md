@@ -4,11 +4,11 @@
 
 **Nanquim** é uma biblioteca gráfica minimalista projetada para tornar a programação visual em C tão simples quanto era no BASIC ou MATLAB. O foco é em **Simulação Científica** e **Prototipagem Rápida**.
 
-Esta versão introduz a compilação como **Shared Library (.so)**, permitindo integração fácil em sistemas Linux.
+Esta versão introduz a compilação como **Shared Library**, permitindo integração fácil em Linux, macOS e Windows.
 
 ## Compilação e Instalação
 
-O projeto agora gera uma biblioteca dinâmica.
+O projeto agora gera uma biblioteca dinâmica (`.so`, `.dylib` ou `.dll`, dependendo da plataforma).
 
 ```bash
 make
@@ -148,4 +148,3 @@ Escreve uma string na tela na posição (x,y) do mundo. Utiliza a cor atual defi
 
 #### `void nq_set_font_size(int size)`
 Define o tamanho base da fonte (atualmente controla o espaçamento/escala interno, implementação via SDL_gfx bitmap font).
-
